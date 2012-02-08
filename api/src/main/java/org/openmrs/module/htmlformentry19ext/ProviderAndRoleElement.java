@@ -33,6 +33,7 @@ import org.openmrs.module.htmlformentry.FormSubmissionError;
 import org.openmrs.module.htmlformentry.action.FormSubmissionControllerAction;
 import org.openmrs.module.htmlformentry.element.HtmlGeneratorElement;
 import org.openmrs.module.htmlformentry.widget.ErrorWidget;
+import org.springframework.util.StringUtils;
 
 
 /**
@@ -74,11 +75,13 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     	context.registerWidget(providerWidget);
     	context.registerErrorWidget(providerWidget, providerErrorWidget);
     	
+    	boolean initialProviderSet = false;
     	if (context.getExistingEncounter() != null) {
     		if (encounterRole != null) {
     			Set<Provider> byRole = context.getExistingEncounter().getProvidersByRole(encounterRole);
     			if (byRole.size() == 1) {
     				providerWidget.setInitialValue(byRole.iterator().next());
+    				initialProviderSet = true;
     			} else if (byRole.size() > 1) {
     				throw new RuntimeException("HTML Form Entry does not (yet) support multiple providers with the same encounter role");
     			} 
@@ -93,8 +96,22 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     				Entry<EncounterRole, Set<Provider>> roleAndProvider = byRoles.entrySet().iterator().next();
     				Provider p = roleAndProvider.getValue().iterator().next();
     				providerWidget.setInitialValue(p);
+    				initialProviderSet = true;
     				roleWidget.setInitialValue(roleAndProvider.getKey());
     			}
+    		}
+    	}
+    	
+    	if (!initialProviderSet && providerWidget != null && StringUtils.hasText(parameters.get("default"))) {
+    		String temp = parameters.get("provider");
+    		Provider provider = null;
+    		try {
+    			provider = Context.getProviderService().getProvider(Integer.valueOf(temp));
+    		} catch (Exception ex) {
+    			provider = Context.getProviderService().getProviderbyUuid(temp);
+    		}
+    		if (provider != null) {
+    			providerWidget.setInitialValue(provider);
     		}
     	}
     }

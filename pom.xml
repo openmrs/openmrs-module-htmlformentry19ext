@@ -57,9 +57,28 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>htmlformentry-api</artifactId>
-				<version>1.8.3-SNAPSHOT</version>
+				<version>1.9.0-SNAPSHOT</version>
 				<type>jar</type>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+		        <groupId>org.openmrs.module</groupId>
+		        <artifactId>htmlformentry-api</artifactId>
+		        <version>1.9.0-SNAPSHOT</version>
+		        <classifier>tests</classifier>
+		        <scope>test</scope>
+		    </dependency>
+		    <dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>logic</artifactId>
+				<version>0.5</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy</artifactId>
+				<version>1.8.3</version>
+				<scope>test</scope>
 			</dependency>
 
 			<!-- End OpenMRS modules -->
