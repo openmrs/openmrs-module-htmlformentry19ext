@@ -34,7 +34,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * Integration test for the <encounterProviderAndRole/> tag 
  */
-public class IntegrationTests extends BaseModuleContextSensitiveTest {
+public class IntegrationTest extends BaseModuleContextSensitiveTest {
 
 	@Before
 	public void setup() throws Exception {
