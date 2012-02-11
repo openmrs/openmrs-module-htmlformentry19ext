@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
+import org.openmrs.module.htmlformentry.BadFormDesignException;
 import org.openmrs.module.htmlformentry.FormEntrySession;
 import org.openmrs.module.htmlformentry.FormSubmissionController;
 import org.openmrs.module.htmlformentry.handler.AttributeDescriptor;
@@ -40,11 +41,12 @@ public class EncounterProviderAndRoleTagHandler extends SubstitutionTagHandler {
 	}
 	
 	/**
-     * @see org.openmrs.module.htmlformentry.handler.SubstitutionTagHandler#getSubstitution(org.openmrs.module.htmlformentry.FormEntrySession, org.openmrs.module.htmlformentry.FormSubmissionController, java.util.Map)
+	 * @see org.openmrs.module.htmlformentry.handler.SubstitutionTagHandler#getSubstitution(org.openmrs.module.htmlformentry.FormEntrySession, org.openmrs.module.htmlformentry.FormSubmissionController, java.util.Map)
+     * @throws BadFormDesignException 
      */
     @Override
     protected String getSubstitution(FormEntrySession session, FormSubmissionController controllerActions,
-                                     Map<String, String> parameters) {
+                                     Map<String, String> parameters) throws BadFormDesignException {
 	    ProviderAndRoleElement element = new ProviderAndRoleElement(session.getContext(), parameters);
 	    session.getSubmissionController().addAction(element);
 	    return element.generateHtml(session.getContext());

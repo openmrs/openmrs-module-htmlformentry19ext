@@ -26,6 +26,7 @@ import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.htmlformentry.BadFormDesignException;
 import org.openmrs.module.htmlformentry.FormEntryContext;
 import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 import org.openmrs.module.htmlformentry.FormEntrySession;
@@ -51,8 +52,9 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
 	
 	/**
      * @param parameters
+	 * @throws BadFormDesignException 
      */
-    public ProviderAndRoleElement(FormEntryContext context, Map<String, String> parameters) {
+    public ProviderAndRoleElement(FormEntryContext context, Map<String, String> parameters) throws BadFormDesignException {
     	if (parameters.containsKey("encounterRole")) {
     		EncounterService es = Context.getEncounterService();
     		String param = parameters.get("encounterRole");
@@ -62,7 +64,7 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     			encounterRole = es.getEncounterRoleByUuid(param);
     		}
     		if (encounterRole == null)
-    			throw new RuntimeException("Cannot find EncounterRole \"" + param + "\"");
+    			throw new BadFormDesignException("Cannot find EncounterRole \"" + param + "\"");
     		
     	} else {
     		roleWidget = new EncounterRoleWidget();
@@ -83,14 +85,14 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     				providerWidget.setInitialValue(byRole.iterator().next());
     				initialProviderSet = true;
     			} else if (byRole.size() > 1) {
-    				throw new RuntimeException("HTML Form Entry does not (yet) support multiple providers with the same encounter role");
+    				throw new BadFormDesignException("HTML Form Entry does not (yet) support multiple providers with the same encounter role");
     			} 
     		} else {
     			Map<EncounterRole, Set<Provider>> byRoles = context.getExistingEncounter().getProvidersByRoles();
     			if (byRoles.size() > 0) {
         			// currently we only support a single provider in this mode
         			if (byRoles.size() > 1 || byRoles.values().iterator().next().size() > 1) {
-        				throw new RuntimeException("HTML Form Entry does not (yet) support multiple providers per encounter if you don't specify an encounterRole for each of them");
+        				throw new BadFormDesignException("HTML Form Entry does not (yet) support multiple providers per encounter if you don't specify an encounterRole for each of them");
         			}
         			
     				Entry<EncounterRole, Set<Provider>> roleAndProvider = byRoles.entrySet().iterator().next();
@@ -108,7 +110,7 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     		try {
     			provider = Context.getProviderService().getProvider(Integer.valueOf(temp));
     		} catch (Exception ex) {
-    			provider = Context.getProviderService().getProviderbyUuid(temp);
+    			provider = Context.getProviderService().getProviderByUuid(temp);
     		}
     		if (provider != null) {
     			providerWidget.setInitialValue(provider);
