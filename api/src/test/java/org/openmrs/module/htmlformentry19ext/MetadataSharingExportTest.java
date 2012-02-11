@@ -48,8 +48,8 @@ public class MetadataSharingExportTest extends BaseModuleContextSensitiveTest {
 				
 		Assert.assertTrue(dependencies.contains(Context.getEncounterService().getEncounterRoleByUuid("e5c5cc92-5283-11e1-bb6a-d975bd577a5e")));
 		Assert.assertTrue(dependencies.contains(Context.getEncounterService().getEncounterRoleByUuid("eb75d754-5283-11e1-bb6a-d975bd577a5e")));
-		Assert.assertTrue(dependencies.contains(Context.getProviderService().getProviderbyUuid("d2299800-cca9-11e0-9572-0800200c9a66"))); // fix after TRUNK-3053
-		Assert.assertTrue(dependencies.contains(Context.getProviderService().getProviderbyUuid("c2299800-cca9-11e0-9572-0800200c9a66"))); // fix after TRUNK-3053
+		Assert.assertTrue(dependencies.contains(Context.getProviderService().getProviderByUuid("d2299800-cca9-11e0-9572-0800200c9a66")));
+		Assert.assertTrue(dependencies.contains(Context.getProviderService().getProviderByUuid("c2299800-cca9-11e0-9572-0800200c9a66")));
 	}
 	
 }
