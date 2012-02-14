@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
 import org.openmrs.api.EncounterService;
@@ -42,6 +43,8 @@ import org.springframework.util.StringUtils;
  */
 public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmissionControllerAction {
 
+	boolean required = false;
+
 	EncounterRoleWidget roleWidget;
 	ErrorWidget roleErrorWidget;
 	ProviderWidget providerWidget;
@@ -55,6 +58,8 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
 	 * @throws BadFormDesignException 
      */
     public ProviderAndRoleElement(FormEntryContext context, Map<String, String> parameters) throws BadFormDesignException {
+    	if (parameters.containsKey("required"))
+    		required = Boolean.valueOf(parameters.get("required"));
     	if (parameters.containsKey("encounterRole")) {
     		EncounterService es = Context.getEncounterService();
     		String param = parameters.get("encounterRole");
@@ -143,6 +148,8 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
      */
     @Override
     public Collection<FormSubmissionError> validateSubmission(FormEntryContext context, HttpServletRequest submission) {
+    	if (!required)
+    		return null;
     	EncounterRole role = encounterRole;
     	Provider provider = null;
     	List<FormSubmissionError> ret = new ArrayList<FormSubmissionError>();
@@ -172,7 +179,14 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     	if (providerWidget != null) {
     		provider = (Provider) providerWidget.getValue(session.getContext(), submission);
     	}
-    	session.getSubmissionActions().getCurrentEncounter().addProvider(role, provider);
+    	if (provider != null) {
+    		session.getSubmissionActions().getCurrentEncounter().setProvider(role, provider);
+    	} else if (role != null) {
+    		// role != null while provider == null is something like "Doctor: null", so clear providers from that role
+    		Encounter encounter = session.getSubmissionActions().getCurrentEncounter();  		
+    		for (Provider p : encounter.getProvidersByRole(role))
+    			encounter.removeProvider(role, p);
+    	}
     }
 
 }
