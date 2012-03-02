@@ -1,0 +1,1 @@
+This module adds extensions to the HTML Form Entry module to support new features of OpenMRS 1.9+.
