@@ -85,6 +85,27 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void testDefaultValue() throws Exception {
+		new RegressionTestHelper() {
+			
+			@Override
+			protected String getXmlDatasetPath() {
+				return "org/openmrs/module/htmlformentry19ext/include/";
+			}
+			
+			@Override
+            public String getFormName() {
+				return "encounterProviderAndRoleTagWithDefault";
+			}
+
+			@Override
+			public void testBlankFormHtml(String html) {
+				Assert.assertTrue(html.contains("<option selected=\"true\" value=\"2\">"));
+			};
+		}.run();
+	}
+	
+	@Test
 	public void testTagSpecifyingEncounterRoleTwice() throws Exception {
 		final Date date = new Date();
 		new RegressionTestHelper() {

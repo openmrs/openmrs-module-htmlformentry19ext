@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
+import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
@@ -110,12 +111,19 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     	}
     	
     	if (!initialProviderSet && providerWidget != null && StringUtils.hasText(parameters.get("default"))) {
-    		String temp = parameters.get("provider");
+    		String temp = parameters.get("default");
     		Provider provider = null;
-    		try {
-    			provider = Context.getProviderService().getProvider(Integer.valueOf(temp));
-    		} catch (Exception ex) {
-    			provider = Context.getProviderService().getProviderByUuid(temp);
+    		if ("currentUser".equals(temp)) {
+    			Person me = Context.getAuthenticatedUser().getPerson();
+    			Collection<Provider> candidates = Context.getProviderService().getProvidersByPerson(me);
+    			if (candidates.size() > 0)
+    				provider = candidates.iterator().next();
+    		} else {
+	    		try {
+	    			provider = Context.getProviderService().getProvider(Integer.valueOf(temp));
+	    		} catch (Exception ex) {
+	    			provider = Context.getProviderService().getProviderByUuid(temp);
+	    		}
     		}
     		if (provider != null) {
     			providerWidget.setInitialValue(provider);
