@@ -24,7 +24,7 @@
 	<scm>
 		<connection>scm:svn:http://svn.openmrs.org/openmrs-modules/htmlformentry19ext/trunk/</connection>
 		<developerConnection>scm:svn:http://svn.openmrs.org/openmrs-modules/htmlformentry19ext/trunk/</developerConnection>
-		<url>http://svn.openmrs.org/openmrs-modules/htmlformentry19ext/trunk/</url>
+		<url>https://github.com/OpenMRS/openmrs-module-htmlformentry19ext</url>
 	</scm>
 
 	<modules>
