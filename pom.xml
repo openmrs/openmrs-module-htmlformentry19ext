@@ -22,8 +22,8 @@
 	</organization>
 
 	<scm>
-		<connection>scm:svn:http://svn.openmrs.org/openmrs-modules/htmlformentry19ext/trunk/</connection>
-		<developerConnection>scm:svn:http://svn.openmrs.org/openmrs-modules/htmlformentry19ext/trunk/</developerConnection>
+		<connection>https://github.com/openmrs/openmrs-module-htmlformentry19ext.git</connection>
+		<developerConnection>https://github.com/openmrs/openmrs-module-htmlformentry19ext.git</developerConnection>
 		<url>https://github.com/OpenMRS/openmrs-module-htmlformentry19ext</url>
 	</scm>
 
@@ -33,7 +33,7 @@
 	</modules>
 	
 	<properties>
-		<openMRSVersion>1.9.0-RC3</openMRSVersion>
+		<openMRSVersion>1.9.0</openMRSVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<htmlFormEntryVersion>1.9.0</htmlFormEntryVersion>
 	</properties>
