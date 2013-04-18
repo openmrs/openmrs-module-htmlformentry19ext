@@ -19,7 +19,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.openmrs.EncounterRole;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.htmlformentry.FormEntryContext;
@@ -51,7 +50,7 @@ public class ProviderWidget implements Widget {
 	public String generateHtml(FormEntryContext context) {
 		if (context.getMode() == Mode.VIEW) {
             if (initialValue != null)
-                return WidgetFactory.displayValue(initialValue.toString());
+                return WidgetFactory.displayValue(initialValue.getName());
             else
                 return "";
         }
@@ -68,7 +67,7 @@ public class ProviderWidget implements Widget {
         	sb.append("\n<option ");
         	if (initialValue != null && initialValue.equals(provider))
         		sb.append("selected=\"true\" ");
-        	sb.append("value=\"" + provider.getId() + "\">").append(provider.toString()).append("</option>");
+        	sb.append("value=\"" + provider.getId() + "\">").append(provider.getName()).append("</option>");
         }
         sb.append("</select>");
 		return sb.toString();
