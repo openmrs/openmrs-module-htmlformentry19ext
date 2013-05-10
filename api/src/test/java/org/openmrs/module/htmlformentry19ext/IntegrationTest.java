@@ -14,6 +14,7 @@
 package org.openmrs.module.htmlformentry19ext;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,7 +107,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void testTagSpecifyingEncounterRoleTwice() throws Exception {
+	public void testTagSpecifyingEncounterProviderTwiceWithDifferentRoles() throws Exception {
 		final Date date = new Date();
 		new RegressionTestHelper() {
 			
@@ -117,7 +118,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 			
 			@Override
             public String getFormName() {
-				return "specifyingEncounterRoleTwice";
+				return "specifyingEncounterRoleTwiceWithDifferentRoles";
 			}
 						
 			@Override
@@ -160,5 +161,71 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 			
 		}.run();
 	}
+
+    @Test
+    public void testTagSpecifyingEncounterProviderTwiceWithSameRole() throws Exception {
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "specifyingEncounterRoleTwiceWithSameRole";
+            }
+
+            @Override
+            public String[] widgetLabels() {
+                return new String[] { "Date:", "Location:", "Doctor 1:", "Doctor 2:" };
+            }
+
+            @Override
+            public void setupRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+                request.addParameter(widgets.get("Date:"), dateAsString(date));
+                request.addParameter(widgets.get("Location:"), "2");
+                request.addParameter(widgets.get("Doctor 1:"), "2"); // Doctor Bob
+                request.addParameter(widgets.get("Doctor 2:"), "1"); // Superuser
+            }
+
+            @Override
+            public void testResults(SubmissionResults results) {
+                results.assertNoErrors();
+                results.assertEncounterCreated();
+                results.assertLocation(2);
+
+                Map<EncounterRole, Set<Provider>> byRoles = results.getEncounterCreated().getProvidersByRoles();
+                Assert.assertEquals(1, byRoles.size());
+
+                Set<Provider> doctors = byRoles.get(Context.getEncounterService().getEncounterRole(3));
+                Assert.assertEquals(2, doctors.size());
+
+                // we can't guarantee the order of providers, but make sure both providers are now present
+                Set<Integer> providerIds = new HashSet<Integer>();
+                for (Provider doctor : doctors) {
+                    providerIds.add(doctor.getId());
+                }
+                Assert.assertEquals(2, providerIds.size());
+                Assert.assertTrue(providerIds.contains(1));
+                Assert.assertTrue(providerIds.contains(2));
+            }
+
+            @Override
+            public boolean doViewEncounter() {
+                return true;
+            }
+
+            @Override
+            public void testViewingEncounter(Encounter encounter, String html) {
+
+                // TODO: get this working--need to handle viewing forms with multiple providers
+                //TestUtil.assertFuzzyContains("Doctor Bob", html);
+                //TestUtil.assertFuzzyContains("Super User", html);
+            }
+
+        }.run();
+    }
 	
 }

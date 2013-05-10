@@ -22,7 +22,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.openmrs.Encounter;
+import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterRole;
 import org.openmrs.Person;
 import org.openmrs.Provider;
@@ -181,19 +181,19 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     public void handleSubmission(FormEntrySession session, HttpServletRequest submission) {
     	EncounterRole role = encounterRole;
     	Provider provider = null;
+
     	if (roleWidget != null) {
     		role = (EncounterRole) roleWidget.getValue(session.getContext(), submission);
     	}
     	if (providerWidget != null) {
     		provider = (Provider) providerWidget.getValue(session.getContext(), submission);
     	}
-    	if (provider != null) {
-    		session.getSubmissionActions().getCurrentEncounter().setProvider(role, provider);
-    	} else if (role != null) {
-    		// role != null while provider == null is something like "Doctor: null", so clear providers from that role
-    		Encounter encounter = session.getSubmissionActions().getCurrentEncounter();  		
-    		for (Provider p : encounter.getProvidersByRole(role))
-    			encounter.removeProvider(role, p);
+    	if (provider != null && role != null) {    // these should never be null because the validator should catch this, but just in case
+            EncounterProvider encounterProvider = new EncounterProvider();
+            encounterProvider.setEncounterRole(role);
+            encounterProvider.setProvider(provider);
+            session.getSubmissionActions().addOtherAction(HtmlFormEntryExtensions19Constants.ENSURE_ENCOUNTER_PROVIDER_EXISTS_ACTION,
+                    encounterProvider);
     	}
     }
 

@@ -33,6 +33,9 @@ public class HTMLFormEntryExtensions19Activator extends BaseModuleActivator {
 	 */
 	public void started() {
 		Context.getService(HtmlFormEntryService.class).addHandler("encounterProviderAndRole", new EncounterProviderAndRoleTagHandler());
+        Context.getService(HtmlFormEntryService.class)
+                .addFormSubmissionActionsExtender(HtmlFormEntryExtensions19Constants.PROVIDER_AND_ROLE_FORM_SUBMISSION_ACTIONS_EXTENDER,
+                        new ProviderAndRoleFormSubmissionActionsExtender());
 		log.info("HTML Form Entry Extensions for OpenMRS 1.9 Module started");
 	}
 	
@@ -41,8 +44,10 @@ public class HTMLFormEntryExtensions19Activator extends BaseModuleActivator {
 	 */
 	public void stopped() {
 		HtmlFormEntryService hfes = Context.getService(HtmlFormEntryService.class);
-		if (hfes != null)
+		if (hfes != null) {
 			hfes.getHandlers().remove("encounterProviderAndRole");
+            hfes.getFormSubmissionActionsExtenders().remove(HtmlFormEntryExtensions19Constants.ENSURE_ENCOUNTER_PROVIDER_EXISTS_ACTION);
+        }
 		log.info("HTML Form Entry Extensions for OpenMRS 1.9 Module stopped");
 	}
 		
