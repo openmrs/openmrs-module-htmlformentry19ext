@@ -25,6 +25,7 @@ import org.openmrs.module.htmlformentry.FormEntryContext;
 import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 import org.openmrs.module.htmlformentry.widget.Widget;
 import org.openmrs.module.htmlformentry.widget.WidgetFactory;
+import org.openmrs.module.htmlformentry19ext.util.ProviderByPersonNameComparator;
 import org.springframework.util.StringUtils;
 
 
@@ -56,7 +57,8 @@ public class ProviderWidget implements Widget {
         }
 		
 		List<Provider> providers = Context.getProviderService().getAllProviders(true);
-		
+		Collections.sort(providers, new ProviderByPersonNameComparator());
+
 		StringBuilder sb = new StringBuilder();
         sb.append("<select name=\"" + context.getFieldName(this) + "\">");
         sb.append("\n<option value=\"\">");
