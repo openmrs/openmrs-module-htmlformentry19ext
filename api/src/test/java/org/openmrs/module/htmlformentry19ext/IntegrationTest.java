@@ -14,6 +14,7 @@
 package org.openmrs.module.htmlformentry19ext;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,7 +60,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 						
 			@Override
 			public String[] widgetLabels() {
-				return new String[] { "Date:", "Location:", "ProviderAndRole:", "ProviderAndRole:!!1" };
+				return new String[] { "Date:", "Location:", "ProviderAndRole:", "ProviderAndRole:!!1"};
 			}
 			
 			@Override
@@ -83,8 +84,92 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 			}
 		}.run();
 	}
-	
-	@Test
+
+    @Test
+    public void testTagWithRequiredAttribute() throws Exception {
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "requiredEncounterProviderAndRoleTag";
+            }
+
+            @Override
+            public String[] widgetLabels() {
+                return new String[] { "Date:", "Location:", "ProviderAndRole:", "ProviderAndRole:!!1"};
+            }
+
+            @Override
+            public void setupRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+                request.addParameter(widgets.get("Date:"), dateAsString(date));
+                request.addParameter(widgets.get("Location:"), "2");
+                request.addParameter(widgets.get("ProviderAndRole:"), "3"); // encounter role
+                request.addParameter(widgets.get("ProviderAndRole:!!1"), "2"); // provider
+            }
+
+            @Override
+            public void testResults(SubmissionResults results) {
+                results.assertNoErrors();
+                results.assertEncounterCreated();
+                results.assertLocation(2);
+                Map<EncounterRole, Set<Provider>> byRoles = results.getEncounterCreated().getProvidersByRoles();
+                Assert.assertEquals(1, byRoles.size());
+                EncounterRole encRole = byRoles.keySet().iterator().next();
+                Assert.assertEquals(Integer.valueOf(3), encRole.getEncounterRoleId());
+                Assert.assertEquals(Integer.valueOf(2), byRoles.get(encRole).iterator().next().getProviderId());
+            }
+        }.run();
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testTagWithRequiredAttribute_shouldThrowExceptionIfNoProvider() throws Exception {
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "requiredEncounterProviderAndRoleTag";
+            }
+
+            @Override
+            public String[] widgetLabels() {
+                return new String[] { "Date:", "Location:", "ProviderAndRole:", "ProviderAndRole:!!1"};
+            }
+
+            @Override
+            public void setupRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+                request.addParameter(widgets.get("Date:"), dateAsString(date));
+                request.addParameter(widgets.get("Location:"), "2");
+                request.addParameter(widgets.get("ProviderAndRole:"), "3"); // encounter role
+            }
+
+            @Override
+            public void testResults(SubmissionResults results) {
+                results.assertNoErrors();
+                results.assertEncounterCreated();
+                results.assertLocation(2);
+                Map<EncounterRole, Set<Provider>> byRoles = results.getEncounterCreated().getProvidersByRoles();
+                Assert.assertEquals(1, byRoles.size());
+                EncounterRole encRole = byRoles.keySet().iterator().next();
+                Assert.assertEquals(Integer.valueOf(3), encRole.getEncounterRoleId());
+                Assert.assertEquals(Integer.valueOf(2), byRoles.get(encRole).iterator().next().getProviderId());
+            }
+        }.run();
+    }
+
+
+    @Test
 	public void testDefaultValue() throws Exception {
 		new RegressionTestHelper() {
 			
@@ -106,7 +191,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void testTagSpecifyingEncounterRoleTwice() throws Exception {
+	public void testTagSpecifyingEncounterProviderTwiceWithDifferentRoles() throws Exception {
 		final Date date = new Date();
 		new RegressionTestHelper() {
 			
@@ -117,7 +202,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 			
 			@Override
             public String getFormName() {
-				return "specifyingEncounterRoleTwice";
+				return "specifyingEncounterRoleTwiceWithDifferentRoles";
 			}
 						
 			@Override
@@ -160,5 +245,194 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 			
 		}.run();
 	}
-	
+
+    @Test
+    public void testTagSpecifyingEncounterProviderTwiceWithSameRole() throws Exception {
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "specifyingEncounterRoleTwiceWithSameRole";
+            }
+
+            @Override
+            public String[] widgetLabels() {
+                return new String[] { "Date:", "Location:", "Doctors:", "Doctors:!!1" };
+            }
+
+            @Override
+            public void setupRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+                request.addParameter(widgets.get("Date:"), dateAsString(date));
+                request.addParameter(widgets.get("Location:"), "2");
+                request.addParameter(widgets.get("Doctors:"), "2"); // Doctor Bob
+                request.addParameter(widgets.get("Doctors:!!1"), "1"); // Superuser  (hack to reference by widget id, but no label for this widget
+            }
+
+            @Override
+            public void testResults(SubmissionResults results) {
+                results.assertNoErrors();
+                results.assertEncounterCreated();
+                results.assertLocation(2);
+
+                Map<EncounterRole, Set<Provider>> byRoles = results.getEncounterCreated().getProvidersByRoles();
+                Assert.assertEquals(1, byRoles.size());
+
+                Set<Provider> doctors = byRoles.get(Context.getEncounterService().getEncounterRole(3));
+                Assert.assertEquals(2, doctors.size());
+
+                // we can't guarantee the order of providers, but make sure both providers are now present
+                Set<Integer> providerIds = new HashSet<Integer>();
+                for (Provider doctor : doctors) {
+                    providerIds.add(doctor.getId());
+                }
+                Assert.assertEquals(2, providerIds.size());
+                Assert.assertTrue(providerIds.contains(1));
+                Assert.assertTrue(providerIds.contains(2));
+            }
+
+            @Override
+            public boolean doViewEncounter() {
+                return true;
+            }
+
+            @Override
+            public void testViewingEncounter(Encounter encounter, String html) {
+                TestUtil.assertFuzzyContains("Doctor Bob", html);
+                TestUtil.assertFuzzyContains("Super User", html);
+            }
+
+        }.run();
+    }
+
+    @Test
+    public void testSpecifyingASingleProviderForTagThatAcceptsTwo() throws Exception {
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "specifyingEncounterRoleTwiceWithSameRole";
+            }
+
+            @Override
+            public String[] widgetLabels() {
+                return new String[] { "Date:", "Location:", "Doctors:" };
+            }
+
+            @Override
+            public void setupRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+                request.addParameter(widgets.get("Date:"), dateAsString(date));
+                request.addParameter(widgets.get("Location:"), "2");
+                request.addParameter(widgets.get("Doctors:"), "2"); // Doctor Bob
+            }
+
+            @Override
+            public void testResults(SubmissionResults results) {
+                results.assertNoErrors();
+                results.assertEncounterCreated();
+                results.assertLocation(2);
+
+                Map<EncounterRole, Set<Provider>> byRoles = results.getEncounterCreated().getProvidersByRoles();
+                Assert.assertEquals(1, byRoles.size());
+
+                Set<Provider> doctors = byRoles.get(Context.getEncounterService().getEncounterRole(3));
+                Assert.assertEquals(1, doctors.size());
+                Assert.assertEquals(new Integer(2), doctors.iterator().next().getId());
+            }
+
+            @Override
+            public boolean doViewEncounter() {
+                return true;
+            }
+
+            @Override
+            public void testViewingEncounter(Encounter encounter, String html) {
+                TestUtil.assertFuzzyContains("Doctor Bob", html);
+                TestUtil.assertFuzzyDoesNotContain("Super User", html);
+            }
+
+        }.run();
+    }
+
+    @Test
+    public void testRemovingProviderFromEncounter() throws Exception {
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            public void testEditFormHtml(String html) {
+                System.out.println(html);
+            }
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "specifyingEncounterRoleTwiceWithSameRole";
+            }
+
+            @Override
+            public String[] widgetLabels() {
+                return new String[] { "Date:", "Location:", "Doctors:", "Doctors:!!1" };
+            }
+
+            @Override
+            public void setupRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+
+                // first set two providers
+                request.addParameter(widgets.get("Date:"), dateAsString(date));
+                request.addParameter(widgets.get("Location:"), "2");
+                request.addParameter(widgets.get("Doctors:"), "2"); // Doctor Bob
+                request.addParameter(widgets.get("Doctors:!!1"), "1"); // Superuser
+
+            }
+
+            @Override
+            public boolean doEditEncounter() {
+                return true;
+            }
+
+            @Override
+            public String[] widgetLabelsForEdit() {
+                return new String[] { "Date:", "Location:", "Doctors:", "Doctors:!!1" };
+            }
+
+            @Override
+            public void setupEditRequest(MockHttpServletRequest request, Map<String, String> widgets) {
+                // now, in the edit request, only set a single provider
+                request.setParameter(widgets.get("Doctors:"), "1"); // Superuser
+                request.setParameter(widgets.get("Doctors:!!1"), ""); // set the second doctor field blank
+            }
+
+            @Override
+            public void testEditedResults(SubmissionResults results) {
+                results.assertNoErrors();
+                results.assertLocation(2);
+
+                Map<EncounterRole, Set<Provider>> byRoles = results.getEncounterCreated().getProvidersByRoles();
+                Assert.assertEquals(1, byRoles.size());
+
+                Set<Provider> doctors = byRoles.get(Context.getEncounterService().getEncounterRole(3));
+                Assert.assertEquals(1, doctors.size());
+
+                Assert.assertEquals(1, doctors.size());
+                Assert.assertEquals(new Integer(1), doctors.iterator().next().getId());
+            }
+        }.run();
+    }
+
 }
