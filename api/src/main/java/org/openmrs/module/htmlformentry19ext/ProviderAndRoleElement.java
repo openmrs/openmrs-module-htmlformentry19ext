@@ -106,7 +106,7 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
                 if (byRoles.size() > 0) {
                     // currently we only support a single provider in this mode
                     if (byRoles.size() > 1 || byRoles.values().iterator().next().size() > 1) {
-                        throw new BadFormDesignException("HTML Form Entry does not (yet) support multiple providers per encounter if you don't specify an encounterRole for each of them");
+                        throw new BadFormDesignException("HTML Form Entry does not (yet) support multiple providers per encounter without specifying encounter roles");
                     }
 
                     Entry<EncounterRole, Set<Provider>> roleAndProvider = byRoles.entrySet().iterator().next();

@@ -44,7 +44,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void testPlainTag() throws Exception {
+	public void encounterProviderAndRole_testPlainTag() throws Exception {
 		final Date date = new Date();
 		new RegressionTestHelper() {
 			
@@ -86,7 +86,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 	}
 
     @Test
-    public void testTagWithRequiredAttribute() throws Exception {
+    public void encounterProviderAndRole_testTagWithRequiredAttribute() throws Exception {
         final Date date = new Date();
         new RegressionTestHelper() {
 
@@ -128,7 +128,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testTagWithRequiredAttribute_shouldThrowExceptionIfNoProvider() throws Exception {
+    public void encounterProviderAndRole_testTagWithRequiredAttribute_shouldThrowExceptionIfNoProvider() throws Exception {
         final Date date = new Date();
         new RegressionTestHelper() {
 
@@ -170,7 +170,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 
 
     @Test
-	public void testDefaultValue() throws Exception {
+	public void encounterProviderAndRole_testDefaultValue() throws Exception {
 		new RegressionTestHelper() {
 			
 			@Override
@@ -189,9 +189,31 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 			};
 		}.run();
 	}
+    @Test
+    public void encounterProviderAndRole_WithMultipleDropdownsOnlySetsOneToDefault() throws Exception {
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "encounterProviderAndRoleTagWithMultipleAndDefault";
+            }
+
+            @Override
+            public void testBlankFormHtml(String html) {
+                Assert.assertTrue(html.contains("<option selected=\"true\" value=\"2\">"));
+                Assert.assertTrue(html.contains("<option value=\"2\">"));
+            };
+        }.run();
+    }
+
 	
 	@Test
-	public void testTagSpecifyingEncounterProviderTwiceWithDifferentRoles() throws Exception {
+	public void encounterProviderAndRole_testTagSpecifyingEncounterProviderTwiceWithDifferentRoles() throws Exception {
 		final Date date = new Date();
 		new RegressionTestHelper() {
 			
@@ -247,7 +269,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
 	}
 
     @Test
-    public void testTagSpecifyingEncounterProviderTwiceWithSameRole() throws Exception {
+    public void encounterProviderAndRole_testTagSpecifyingEncounterProviderTwiceWithSameRole() throws Exception {
         final Date date = new Date();
         new RegressionTestHelper() {
 
@@ -311,7 +333,7 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
     }
 
     @Test
-    public void testSpecifyingASingleProviderForTagThatAcceptsTwo() throws Exception {
+    public void encounterProviderAndRole_testSpecifyingASingleProviderForTagThatAcceptsTwo() throws Exception {
         final Date date = new Date();
         new RegressionTestHelper() {
 
@@ -366,14 +388,9 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
     }
 
     @Test
-    public void testRemovingProviderFromEncounter() throws Exception {
+    public void encounterProviderAndRole_testRemovingProviderFromEncounter() throws Exception {
         final Date date = new Date();
         new RegressionTestHelper() {
-
-            @Override
-            public void testEditFormHtml(String html) {
-                System.out.println(html);
-            }
 
             @Override
             protected String getXmlDatasetPath() {
