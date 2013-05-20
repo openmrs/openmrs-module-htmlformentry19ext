@@ -11,7 +11,7 @@
 	<packaging>jar</packaging>
 	<name>HTML Form Entry Extensions for OpenMRS 1.9 Module API</name>
 	<description>API project for HTMLFormEntryExtensionsforOpenMRS1.9</description>
-	
+
 	<build>
 		<resources>
 			<resource>

@@ -13,12 +13,6 @@
  */
 package org.openmrs.module.htmlformentry19ext;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.htmlformentry.FormEntryContext;
@@ -28,6 +22,11 @@ import org.openmrs.module.htmlformentry.widget.WidgetFactory;
 import org.openmrs.module.htmlformentry19ext.util.ProviderByPersonNameComparator;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * Widget that lets you choose a {@link Provider} from a dropdown
@@ -35,6 +34,8 @@ import org.springframework.util.StringUtils;
 public class ProviderWidget implements Widget {
 	
 	private Provider initialValue;
+
+    private List<Provider> providers = new ArrayList<Provider>();
 	
 	/**
 	 * @see org.openmrs.module.htmlformentry.widget.Widget#setInitialValue(java.lang.Object)
@@ -43,8 +44,12 @@ public class ProviderWidget implements Widget {
 	public void setInitialValue(Object initialValue) {
 		this.initialValue = (Provider) initialValue;
 	}
-	
-	/**
+
+    public void setProviders(List<Provider> providers) {
+        this.providers = providers;
+    }
+
+    /**
 	 * @see org.openmrs.module.htmlformentry.widget.Widget#generateHtml(org.openmrs.module.htmlformentry.FormEntryContext)
 	 */
 	@Override
@@ -55,8 +60,7 @@ public class ProviderWidget implements Widget {
             else
                 return "";
         }
-		
-		List<Provider> providers = Context.getProviderService().getAllProviders(true);
+
 		Collections.sort(providers, new ProviderByPersonNameComparator());
 
 		StringBuilder sb = new StringBuilder();

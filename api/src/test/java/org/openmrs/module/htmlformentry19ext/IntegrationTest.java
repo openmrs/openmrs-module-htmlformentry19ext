@@ -13,13 +13,7 @@
  */
 package org.openmrs.module.htmlformentry19ext;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Encounter;
@@ -30,6 +24,11 @@ import org.openmrs.module.htmlformentry.RegressionTestHelper;
 import org.openmrs.module.htmlformentry.TestUtil;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -451,5 +450,37 @@ public class IntegrationTest extends BaseModuleContextSensitiveTest {
             }
         }.run();
     }
+
+    @Test
+    public void encounterProviderAndRole_testWithProviderRoleAttribute() throws Exception {
+
+        // load the provider role specific test dataset
+        executeDataSet("org/openmrs/module/htmlformentry19ext/include/providerRoles-dataset.xml");
+
+        final Date date = new Date();
+        new RegressionTestHelper() {
+
+            @Override
+            protected String getXmlDatasetPath() {
+                return "org/openmrs/module/htmlformentry19ext/include/";
+            }
+
+            @Override
+            public String getFormName() {
+                return "encounterProviderAndRoleTagWithProviderRolesAttribute";
+            }
+
+            @Override
+            public void testBlankFormHtml(String html) {
+                TestUtil.assertFuzzyContains("Mr. Horatio Test Hornblower", html);
+                TestUtil.assertFuzzyContains("Johnny Test Doe", html);
+                TestUtil.assertFuzzyContains("Collet Test Chebaskwony", html);
+
+                TestUtil.assertFuzzyDoesNotContain("Anet Test Oloo", html);
+            }
+
+        }.run();
+    }
+
 
 }

@@ -13,16 +13,6 @@
  */
 package org.openmrs.module.htmlformentry19ext;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.openmrs.EncounterRole;
 import org.openmrs.Person;
 import org.openmrs.Provider;
@@ -36,7 +26,17 @@ import org.openmrs.module.htmlformentry.FormSubmissionError;
 import org.openmrs.module.htmlformentry.action.FormSubmissionControllerAction;
 import org.openmrs.module.htmlformentry.element.HtmlGeneratorElement;
 import org.openmrs.module.htmlformentry.widget.ErrorWidget;
+import org.openmrs.module.htmlformentry19ext.util.HtmlFormEntryExtensions19Utils;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 
 /**
@@ -54,13 +54,18 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
 	
 	// in case EncounterRole is specified as a parameter to the tag
 	EncounterRole encounterRole;
-	
+
+    public ProviderAndRoleElement() {
+        // just used for testing, you should always initialize with the constructor below
+    }
+
 	/**
      * @param parameters
 	 * @throws BadFormDesignException 
      */
     public ProviderAndRoleElement(FormEntryContext context, Map<String, String> parameters) throws BadFormDesignException {
-    	if (parameters.containsKey("required")) {
+
+        if (parameters.containsKey("required")) {
     		required = Boolean.valueOf(parameters.get("required"));
         }
         if (parameters.containsKey("count")) {
@@ -86,6 +91,9 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     		context.registerErrorWidget(roleWidget, roleErrorWidget);
     	}
 
+        // get the list of providers we want to use
+        List<Provider> providerList = getProviderList(parameters);
+
         boolean initialProviderSet = false;
 
         // handle the case where no encounterRole attribute is specified
@@ -95,6 +103,7 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
             }
 
             ProviderWidget providerWidget = new ProviderWidget();
+            providerWidget.setProviders(providerList);
             ErrorWidget providerErrorWidget = new ErrorWidget();
             context.registerWidget(providerWidget);
             context.registerErrorWidget(providerWidget, providerErrorWidget);
@@ -130,6 +139,7 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
     	    for (int currentIteration = 0; currentIteration < count; currentIteration++) {
 
                 ProviderWidget providerWidget = new ProviderWidget();
+                providerWidget.setProviders(providerList);
                 ErrorWidget providerErrorWidget = new ErrorWidget();
                 context.registerWidget(providerWidget);
                 context.registerErrorWidget(providerWidget, providerErrorWidget);
@@ -257,5 +267,34 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
         for (Provider providerToRemove : currentProvidersForRole) {
             session.getSubmissionActions().getCurrentEncounter().removeProvider(role, providerToRemove);
         }
+    }
+
+    protected List<Provider> getProviderList(Map<String, String> parameters)  throws BadFormDesignException {
+
+        List<Provider> providerList = new ArrayList<Provider>();
+
+        // if no provider roles specified, just return all (non-voided) providers
+        if (!parameters.containsKey("providerRoles")) {
+            providerList = Context.getProviderService().getAllProviders(true);
+        }
+        else {
+            // retrieve the provider roles referenced in the tag
+            List providerRoles = new ArrayList();
+
+            for (String providerRoleId : parameters.get("providerRoles").split(",")) {
+                Object providerRole = HtmlFormEntryExtensions19Utils.getProviderRole(providerRoleId.trim());
+
+                if (providerRole == null) {
+                    throw new BadFormDesignException("No provider role found with id or uuid " + providerRoleId.trim());
+
+                }
+
+                providerRoles.add(providerRole);
+            }
+
+            providerList = HtmlFormEntryExtensions19Utils.getProviders(providerRoles);
+        }
+
+        return providerList;
     }
 }
