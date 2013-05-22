@@ -3,7 +3,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>htmlformentry19ext</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<packaging>pom</packaging>
 	<name>HTML Form Entry Extensions for OpenMRS 1.9 Module</name>
 	<description>Provides access to OpenMRS 1.9 functionality (e.g. Providers) in HTML Form Entry</description>
