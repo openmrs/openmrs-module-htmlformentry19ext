@@ -1,6 +1,7 @@
 package org.openmrs.module.htmlformentry19ext.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 
@@ -108,5 +109,52 @@ public class HtmlFormEntryExtensions19Utils {
         }
 
     }
+
+    /**
+     * Convenience method to get all the names of this PersonName and concatonating them together
+     * with family name compoenents first, separated by a comma from given and middle names.
+     * If any part of {@link #getPrefix()}, {@link #getGivenName()},
+     * {@link #getMiddleName()}, etc are null, they are not included in the returned name
+     *
+     * @return all of the parts of this {@link PersonName} joined with spaces
+     * @should not put spaces around an empty middle name
+     */
+    public static String getFullNameWithFamilyNameFirst(PersonName personName) {
+
+        StringBuffer nameString = new StringBuffer();
+
+        if (StringUtils.isNotBlank(personName.getFamilyNamePrefix())) {
+            nameString.append(personName.getFamilyNamePrefix() + " ");
+        }
+        if (StringUtils.isNotBlank(personName.getFamilyName())) {
+            nameString.append(personName.getFamilyName() + " ");
+        }
+        if (StringUtils.isNotBlank(personName.getFamilyName2())) {
+            nameString.append(personName.getFamilyName2() + " ");
+        }
+        if (StringUtils.isNotBlank(personName.getFamilyNameSuffix())) {
+            nameString.append(personName.getFamilyNameSuffix() + " ");
+        }
+
+        nameString.deleteCharAt(nameString.length() - 1); // delete trailing space
+        nameString.append(", ");
+
+        if (StringUtils.isNotBlank(personName.getPrefix())) {
+            nameString.append(personName.getPrefix() + " ");
+        }
+        if (StringUtils.isNotBlank(personName.getGivenName())) {
+            nameString.append(personName.getGivenName() + " ");
+        }
+        if (StringUtils.isNotBlank(personName.getMiddleName())) {
+            nameString.append(personName.getMiddleName() + " ");
+        }
+        if (StringUtils.isNotBlank(personName.getDegree())) {
+            nameString.append(personName.getDegree() + " ");
+        }
+
+        nameString.deleteCharAt(nameString.length() - 1); // delete trailing space
+        return nameString.toString();
+    }
+
 
 }

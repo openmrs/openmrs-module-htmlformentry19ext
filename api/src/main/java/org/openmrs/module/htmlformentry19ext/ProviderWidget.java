@@ -19,6 +19,7 @@ import org.openmrs.module.htmlformentry.FormEntryContext;
 import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 import org.openmrs.module.htmlformentry.widget.Widget;
 import org.openmrs.module.htmlformentry.widget.WidgetFactory;
+import org.openmrs.module.htmlformentry19ext.util.HtmlFormEntryExtensions19Utils;
 import org.openmrs.module.htmlformentry19ext.util.ProviderByPersonNameComparator;
 import org.springframework.util.StringUtils;
 
@@ -73,7 +74,10 @@ public class ProviderWidget implements Widget {
         	sb.append("\n<option ");
         	if (initialValue != null && initialValue.equals(provider))
         		sb.append("selected=\"true\" ");
-        	sb.append("value=\"" + provider.getId() + "\">").append(provider.getName()).append("</option>");
+        	sb.append("value=\"" + provider.getId() + "\">").append(provider.getPerson() != null ?
+                    HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(provider.getPerson().getPersonName()) :
+                    provider.getName())
+                    .append("</option>");
         }
         sb.append("</select>");
 		return sb.toString();
