@@ -273,9 +273,9 @@ public class ProviderAndRoleElement implements HtmlGeneratorElement, FormSubmiss
 
         List<Provider> providerList = new ArrayList<Provider>();
 
-        // if no provider roles specified, just return all (non-voided) providers
+        // if no provider roles specified, just return all (non-retired) providers
         if (!parameters.containsKey("providerRoles")) {
-            providerList = Context.getProviderService().getAllProviders(true);
+            providerList = Context.getProviderService().getAllProviders(false);
         }
         else {
             // retrieve the provider roles referenced in the tag
