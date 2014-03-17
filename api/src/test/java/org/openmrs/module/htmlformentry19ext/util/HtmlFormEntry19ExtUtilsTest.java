@@ -30,4 +30,17 @@ public class HtmlFormEntry19ExtUtilsTest {
         assertThat(HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(name), is("de Cameroon Smith Jr., Mr. Mark Brutus Esq."));
     }
 
+    @Test
+    public void getFullNameWithFamilyNameFirst_shouldNotFailIfProviderDoesNotHaveFamilyName() {
+        PersonName name = new PersonName();
+        name.setGivenName("Mark");
+        assertThat(HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(name), is("Mark"));
+    }
+
+    @Test
+    public void getFullNameWithFamilyNameFirst_shouldNotFailIfProviderHasNoName() {
+        PersonName name = new PersonName();
+        assertThat(HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(name), is(""));
+    }
+
 }

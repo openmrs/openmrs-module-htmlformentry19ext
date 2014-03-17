@@ -136,8 +136,10 @@ public class HtmlFormEntryExtensions19Utils {
             nameString.append(personName.getFamilyNameSuffix() + " ");
         }
 
-        nameString.deleteCharAt(nameString.length() - 1); // delete trailing space
-        nameString.append(", ");
+        if (nameString.length() > 0) {
+            nameString.deleteCharAt(nameString.length() - 1); // delete trailing space
+            nameString.append(", ");
+        }
 
         if (StringUtils.isNotBlank(personName.getPrefix())) {
             nameString.append(personName.getPrefix() + " ");
@@ -152,7 +154,10 @@ public class HtmlFormEntryExtensions19Utils {
             nameString.append(personName.getDegree() + " ");
         }
 
-        nameString.deleteCharAt(nameString.length() - 1); // delete trailing space
+        if (nameString.length() > 1) {
+            nameString.deleteCharAt(nameString.length() - 1); // delete trailing space
+        }
+
         return nameString.toString();
     }
 
