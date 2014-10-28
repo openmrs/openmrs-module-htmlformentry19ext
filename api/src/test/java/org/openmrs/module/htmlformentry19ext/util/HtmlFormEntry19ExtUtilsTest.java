@@ -2,11 +2,13 @@ package org.openmrs.module.htmlformentry19ext.util;
 
 import org.junit.Test;
 import org.openmrs.PersonName;
+import org.openmrs.api.context.Context;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class HtmlFormEntry19ExtUtilsTest {
+public class HtmlFormEntry19ExtUtilsTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void getFullNameWithFamilyNameFirst_shouldReturnProperSimpleName() {
@@ -42,5 +44,11 @@ public class HtmlFormEntry19ExtUtilsTest {
         PersonName name = new PersonName();
         assertThat(HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(name), is(""));
     }
+    
+	@Test
+	public void getFullNameWithFamilyNameFirst_shouldReturnDeletedIfPersonNameIsNull() {
+		assertThat(HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(null), is("["
+		        + Context.getMessageSourceService().getMessage("htmlformentry19ext.unknownProviderName") + "]"));
+	}
 
 }

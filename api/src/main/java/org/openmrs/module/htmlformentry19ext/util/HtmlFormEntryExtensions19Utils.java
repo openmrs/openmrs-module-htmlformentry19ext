@@ -120,6 +120,10 @@ public class HtmlFormEntryExtensions19Utils {
      * @should not put spaces around an empty middle name
      */
     public static String getFullNameWithFamilyNameFirst(PersonName personName) {
+    	
+    	if (personName == null) {
+    		return "[" + Context.getMessageSourceService().getMessage("htmlformentry19ext.unknownProviderName") + "]";
+    	}
 
         StringBuffer nameString = new StringBuffer();
 
