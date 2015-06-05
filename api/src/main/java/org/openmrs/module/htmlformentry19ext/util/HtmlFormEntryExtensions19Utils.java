@@ -4,9 +4,12 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.htmlformentry19ext.element.ProviderStub;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HtmlFormEntryExtensions19Utils {
@@ -165,5 +168,82 @@ public class HtmlFormEntryExtensions19Utils {
         return nameString.toString();
     }
 
+    /**
+     * Converts a collection of providers domain object into simple stub representation
+     * @param providers
+     * @return
+     */
+    public static List<ProviderStub> getProviderStubs(Collection<Provider> providers) {
+        List<ProviderStub> providerStubList = new LinkedList<ProviderStub>();
+        if(providers != null && !providers.isEmpty()) {
+            for (Provider p : providers) {
+                providerStubList.add(new ProviderStub(p));
+            }
+        }
+        return providerStubList;
+    }
 
+    public static List<ProviderStub> getProviderStubs(Collection<Provider> providers,String searchParam,
+                                                      MatchMode mode) {
+        Transformer<Provider, ProviderStub> transformer = new ProviderTransformer();
+        if(mode != null) {
+            switch (mode) {
+                case END:
+                    return (List<ProviderStub>) transformer.transform(providers, endsWith(searchParam));
+                case ANYWHERE:
+                    return getProviderStubs(providers);
+            }
+        }
+        return (List<ProviderStub>) transformer.transform(providers,startsWith(searchParam));
+    }
+
+    private static Predicate<Provider> startsWith(final String param) {
+        return new Predicate<Provider>() {
+            @Override
+            public boolean test(Provider provider) {
+                String identifier = provider.getIdentifier();
+                if(StringUtils.startsWithIgnoreCase(identifier,param)) return true;
+                if(provider.getPerson() != null) {
+                    PersonName name = provider.getPerson().getPersonName();
+                    if (name != null) {
+                        if (StringUtils.startsWithIgnoreCase(name.getGivenName(),param) ||
+                                StringUtils.startsWithIgnoreCase(name.getFamilyName(),param) ||
+                                StringUtils.startsWithIgnoreCase(name.getMiddleName(), param))
+                            return true;
+                    }
+                }
+                //Check the provider name (From provider table)
+                String[] names = provider.getName().split(" ");
+                for(String n:names) {
+                    if (StringUtils.startsWithIgnoreCase(n,param)) return true;
+                }
+                return false;
+            }
+        };
+    }
+
+    private static Predicate<Provider> endsWith(final String param) {
+        return new Predicate<Provider>() {
+            @Override
+            public boolean test(Provider provider) {
+                String identifier = provider.getIdentifier();
+                if(StringUtils.endsWithIgnoreCase(identifier, param)) return true;
+                if(provider.getPerson() != null) {
+                    PersonName name = provider.getPerson().getPersonName();
+                    if (name != null) {
+                        if (StringUtils.endsWithIgnoreCase(name.getGivenName(),param) ||
+                                StringUtils.endsWithIgnoreCase(name.getFamilyName(),param) ||
+                                StringUtils.endsWithIgnoreCase(name.getMiddleName(), param))
+                            return true;
+                    }
+                }
+                //Check the provider name (From provider table
+                String[] names = provider.getName().split(" ");
+                for(String n:names) {
+                    if (StringUtils.endsWithIgnoreCase(n, param)) return true;
+                }
+                return false;
+            }
+        };
+    }
 }
