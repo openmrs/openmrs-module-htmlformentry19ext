@@ -1,12 +1,16 @@
 package org.openmrs.module.htmlformentry19ext.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.htmlformentry19ext.element.ProviderStub;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HtmlFormEntryExtensions19Utils {
@@ -165,5 +169,86 @@ public class HtmlFormEntryExtensions19Utils {
         return nameString.toString();
     }
 
+    /**
+     * Converts a collection of providers domain object into simple stub representation
+     * @param providers
+     * @return
+     */
+    public static List<ProviderStub> getProviderStubs(Collection<Provider> providers) {
+        List<ProviderStub> providerStubList = new LinkedList<ProviderStub>();
+        if(providers != null && !providers.isEmpty()) {
+            for (Provider p : providers) {
+                providerStubList.add(new ProviderStub(p));
+            }
+        }
+        return providerStubList;
+    }
 
+    public static List<ProviderStub> getProviderStubs(Collection<Provider> providers,String searchParam,
+                                                      MatchMode mode) {
+        if(mode != null) {
+            Transformer<Provider, ProviderStub> transformer = new ProviderTransformer();
+            switch (mode) {
+                case START:
+                    return (List<ProviderStub>) transformer.transform(providers, startsWith(searchParam));
+                case END:
+                    return (List<ProviderStub>) transformer.transform(providers, endsWith(searchParam));
+                default:
+                    return getProviderStubs(providers);
+            }
+        }
+        return getProviderStubs(providers);
+    }
+
+    private static Predicate<Provider> startsWith(final String param) {
+        return new Predicate<Provider>() {
+            @Override
+            public boolean test(Provider provider) {
+                String identifier = provider.getIdentifier();
+                String lowerCaseParam = param.toLowerCase();
+                if(identifier.toLowerCase().startsWith(lowerCaseParam)) return true;
+                if(provider.getPerson() != null) {
+                    PersonName name = provider.getPerson().getPersonName();
+                    if (name != null) {
+                        if (name.getGivenName().toLowerCase().startsWith(lowerCaseParam) ||
+                                name.getFamilyName().toLowerCase().startsWith(lowerCaseParam) ||
+                                name.getMiddleName().toLowerCase().startsWith(lowerCaseParam))
+                            return true;
+                    }
+                }
+                //Check the provider name (From provider table)
+                String[] names = provider.getName().split(" ");
+                for(String n:names) {
+                    if (n.toLowerCase().startsWith(lowerCaseParam)) return true;
+                }
+                return false;
+            }
+        };
+    }
+
+    private static Predicate<Provider> endsWith(final String param) {
+        return new Predicate<Provider>() {
+            @Override
+            public boolean test(Provider provider) {
+                String lowerCaseParam = param.toLowerCase();
+                String identifier = provider.getIdentifier();
+                if(identifier.toLowerCase().endsWith(lowerCaseParam)) return true;
+                if(provider.getPerson() != null) {
+                    PersonName name = provider.getPerson().getPersonName();
+                    if (name != null) {
+                        if (name.getGivenName().toLowerCase().endsWith(lowerCaseParam) ||
+                                name.getFamilyName().toLowerCase().endsWith(lowerCaseParam) ||
+                                name.getMiddleName().toLowerCase().endsWith(lowerCaseParam))
+                            return true;
+                    }
+                }
+                //Check the provider name (From provider table
+                String[] names = provider.getName().split(" ");
+                for(String n:names) {
+                    if (n.toLowerCase().endsWith(lowerCaseParam)) return true;
+                }
+                return false;
+            }
+        };
+    }
 }
