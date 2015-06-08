@@ -1,14 +1,26 @@
 package org.openmrs.module.htmlformentry19ext.util;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PersonName;
+import org.openmrs.Provider;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.htmlformentry19ext.element.ProviderStub;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class HtmlFormEntry19ExtUtilsTest extends BaseModuleContextSensitiveTest {
+
+    @Before
+    public void setup() throws Exception{
+       executeDataSet("org/openmrs/module/htmlformentry19ext/include/provider-dataset.xml");
+    }
 
     @Test
     public void getFullNameWithFamilyNameFirst_shouldReturnProperSimpleName() {
@@ -50,5 +62,93 @@ public class HtmlFormEntry19ExtUtilsTest extends BaseModuleContextSensitiveTest 
 		assertThat(HtmlFormEntryExtensions19Utils.getFullNameWithFamilyNameFirst(null), is("["
 		        + Context.getMessageSourceService().getMessage("htmlformentry19ext.unknownProviderName") + "]"));
 	}
+
+    /**
+     * Tests for person names associated with a person object attached to the provider object.
+     */
+    @Test
+    public  void getProviders_shouldReturnProviderStubsWhosePersonNamesStartWithAGivenString() {
+        ProviderService providerService = Context.getProviderService();
+
+        String search = "sura";
+        List<Provider> providers = providerService.getProviders(search, null, null, null);
+        List<ProviderStub> providerStubs =
+                HtmlFormEntryExtensions19Utils.getProviderStubs(providers,search,MatchMode.START);
+        Provider provider = providerService.getProvider(13002);    //From provider-dataset.xml
+
+        assertTrue(providerStubs.contains(new ProviderStub(provider)));
+    }
+
+    /**
+     * This tests for names stored directly in provider object as name field.
+     */
+    @Test
+    public void getProviders_shouldReturnProvidersStubsWhoseProviderNameStartWithAGivenString() {
+        ProviderService providerService = Context.getProviderService();
+        String search = "kisa";
+        List<Provider> providers = providerService.getProviders(search,null,null,null);
+        List<ProviderStub> providerStubs = HtmlFormEntryExtensions19Utils.getProviderStubs(providers,search,MatchMode.START);
+        Provider provider = providerService.getProvider(13010);          //From provider-datasets.xml
+
+        assertTrue(providerStubs.contains(new ProviderStub(provider)));
+    }
+
+    /**
+     * Tests for provider identifier stored in provider object
+     */
+    @Test
+    public void getProviders_shouldReturnProviderStubsWhoseIdentifiersStartWithAGivenString() {
+        ProviderService providerService = Context.getProviderService();
+        String search = "5566-1";
+        List<Provider> providers = providerService.getProviders(search,null,null,null);
+        List<ProviderStub> providerStubs = HtmlFormEntryExtensions19Utils.getProviderStubs(providers,search,MatchMode.START);
+        Provider provider = providerService.getProvider(13002);
+
+        assertTrue(providerStubs.contains(new ProviderStub(provider)));
+    }
+
+    /**
+     * This tests for names stores as person names stored as names of associated person object.
+     */
+    @Test
+    public void getProviders_shouldReturnProviderStubsWhosePersonNamesEndsWithAString() {
+        ProviderService providerService = Context.getProviderService();
+        String search = "rathne";
+        List<Provider> providers = providerService.getProviders(search, null, null, null);
+        List<ProviderStub> providerStubs =
+                HtmlFormEntryExtensions19Utils.getProviderStubs(providers,search,MatchMode.END);
+        Provider provider = providerService.getProvider(13002);    //From provider-dataset.xml
+
+        assertTrue(providerStubs.contains(new ProviderStub(provider)));
+    }
+
+
+    /**
+     * Tests for names stored directly in provider object as a name field
+     */
+    @Test
+    public void getProviders_shouldReturnProviderStubsWhoseProviderNamesEndWithAGivenString() {
+        ProviderService providerService = Context.getProviderService();
+        String search = "Sanga";
+        List<Provider> providers = providerService.getProviders(search,null,null,null);
+        List<ProviderStub> providerStubs = HtmlFormEntryExtensions19Utils.getProviderStubs(providers,search,MatchMode.END);
+        Provider provider = providerService.getProvider(13010);          //From provider-datasets.xml
+
+        assertTrue(providerStubs.contains(new ProviderStub(provider)));
+    }
+
+    /**
+     * Tests for provider identifier stored in provider table
+     */
+    @Test
+    public void getProviders_shouldReturnProviderStubsWhoseIdentifierEndsWithAGivenString() {
+        ProviderService providerService = Context.getProviderService();
+        String search = "05-999";
+        List<Provider> providers = providerService.getProviders(search,null,null,null);
+        List<ProviderStub> providerStubs = HtmlFormEntryExtensions19Utils.getProviderStubs(providers,search,MatchMode.END);
+        Provider provider = providerService.getProvider(13010);
+
+        assertTrue(providerStubs.contains(new ProviderStub(provider)));
+    }
 
 }
