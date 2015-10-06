@@ -124,6 +124,10 @@ public class ProviderAjaxAutoCompleteWidget implements Widget {
         sb.append("        }, \n");
 
         sb.append("        minLength: 2, \n");
+        sb.append("        focus: function(event, ui) {\n");
+        sb.append("             textField.val(ui.item.label);\n");
+        sb.append("             return false;\n");
+        sb.append("         }, \n");
         sb.append("        select: function(event, ui) {\n");
         sb.append("            hiddenField.val(ui.item.value); \n");
         sb.append("            textField.val(ui.item.label); \n");
