@@ -14,20 +14,51 @@
 package org.openmrs.module.htmlformentry19ext;
 
 
-import org.apache.commons.logging.Log; 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.Module;
 import org.openmrs.module.ModuleActivator;
+import org.openmrs.module.ModuleFactory;
+import org.openmrs.module.ModuleUtil;
 import org.openmrs.module.htmlformentry.HtmlFormEntryService;
 
 /**
  * This class contains the logic that is run every time this module is either started or stopped.
  */
 public class HTMLFormEntryExtensions19Activator extends BaseModuleActivator {
-	
+
+	private static final String HTMLFORMENTRY_ID = "htmlformentry";
+
+	private static final String HTMLFORMENTRY_19_EXT_ID = "htmlformentry19ext";
+
+	private static final String LAST_VERSION_BEFORE_MERGE = "3.3.0";
+
 	protected Log log = LogFactory.getLog(getClass());
-		
+
+	/**
+	 * @see ModuleActivator#willRefreshContext()
+	 */
+	@Override
+	public void willRefreshContext() {
+		Module htmlformentry = ModuleFactory.getModuleById(HTMLFORMENTRY_ID);
+		if(ModuleUtil.compareVersion(htmlformentry.getVersion(), LAST_VERSION_BEFORE_MERGE) > 0){
+			log.error("Functionality of htmlformentry19ext module has been moved to htmlformentry module since 3.3.1. Unloading htmlformentry1.9");
+			try {
+				ModuleFactory.unloadModule(ModuleFactory.getModuleById(HTMLFORMENTRY_19_EXT_ID));
+			} catch( APIException e ){
+				/**
+				 * method {@link HTMLFormEntryExtensions19Activator#stopped()} throws API exception
+				 * because service HtmlFormEntryService is not loaded before context refresh.
+				 * There is no need to do anything about it, because 'started' hasn't been invoked yet
+				 * catching this error prevents logging stack trace.
+                 */
+			}
+		}
+	}
+
 	/**
 	 * @see ModuleActivator#started()
 	 */
